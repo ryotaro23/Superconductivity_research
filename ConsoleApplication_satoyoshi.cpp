@@ -69,7 +69,7 @@ SENTENSE(XX年YY月ZZ日)
 #endif
 
 
-#define OUTPUT_CD_VIEW_FILE //cd_viewファイルが要らなければ,コメントアウト
+#define OUTPUT_CD_VIEW_FILE //cd_viewファイルが要らなければ,コメントアウトしてください
 
 #define VARIABLE     //変数を導入するか
 #define CHANGE_KLX   //ローレンツ力を変数として動かすか

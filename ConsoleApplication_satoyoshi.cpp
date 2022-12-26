@@ -103,9 +103,9 @@ SENTENSE(XX年YY月ZZ日)
 #define NX		3
 #define NY		3
 
-#define PP		(Np/3)
+#define PP		(Np/3) //一行あたりのピニングサイトの数
 //#define STOP 1.37e-17	//struve_H1用
-#define K1(x) gsl_sf_bessel_K1(x)	//1次の第二種ベッセル
+#define K1(x) gsl_sf_bessel_K1(x)	//1次の第二種ベッセル(＝第二種変形ベッセル関数）
 
 
 #define POS_OFFS 0
@@ -137,7 +137,7 @@ void set_pinning_site_2(double* ps, double side, double Rl, double Rs);
 double fvv(const double r);
 double fp(const double r);
 double fp_inside(double r);
-double struve_H1(const double x);
+double struve_H1(const double x); //シュトルーベ関数
 double mean(double data[], int step, int n);
 double f(double* vl, double* fc, int j);
 
@@ -163,14 +163,14 @@ f0 = 1.0,			//VV相互作用の大きさの係数
 Eta = 1.0,			//粘性係数
 Kp = 2.0,			//ピン止め力係数
 //Lp=0.05,
-Lp = 0.3 * sqrt(2.0),	//ピニング回復長
+Lp = 0.3 * sqrt(2.0),	//ピニング回復長（ピニングサイトにおける常伝導から超伝導への回復長）
 Klx = 1.965,			//x方向ローレンツ力係数
 Kly = 0.0,			//y方向ローレンツ力係数
 lambda = 1.0,
 //lambda = 10.0,
 Lambda = 2 * lambda / tanh(d / lambda),
 //Dp = 4.0,
-Dp = 16,		// 実際の系だとDp=40(4um)
+Dp = 16,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
 
 //2021追加分
 /*PSLargeとPSMiddle間の中心間距離。PSMiddleとPSSmall間の中心間距離。PSSmallとPSLarge間の中心間距離。*/
@@ -183,11 +183,11 @@ Dp_S2L = 10,
 Rl = 1.5,           //Large PSの半径
 Rm = 1.0,
 Rs = 0.5,
-Fp_cutoff = Dp;//Dp;
+Fp_cutoff = Dp;//Dp;ピニング力がかからない距離
 
 double
-fq = 2.068e-15,
-mu_vac = 4 * M_PI * pow(10.0, -7.0),
+fq = 2.068e-15, //ボルテックスの値
+mu_vac = 4 * M_PI * pow(10.0, -7.0), //真空の透磁率
 boltzmann = 1.381e-23;
 
 double    variable;
@@ -197,10 +197,10 @@ double    set_temp = 4.2;
 double	  dt = 0.001;
 //int       period = 10000000;
 //int       period = 100000;      //ローレンツ力の周期 20Mhz
-int		  period = 25000;		//5Mhz
+int		  period = 25000;		//5Mhz　周期
 int       change_pm = period / 2; //ローレンツ力の±を切り替える 50000 (periodが半分まで到達したら±切り替える)
 int       N_period = 3;        //交流で何周期分計算するか(左右にローレンツ力を何回振るか)
-int       total_step = N_period * period;
+int       total_step = N_period * period; //トータルの周期、時間
 
 //const int PP = 4;//ピニングサイトの周期
 
@@ -209,11 +209,11 @@ double
 scale_length = 100e-9,
 real_lambda = scale_length * lambda,
 real_d = scale_length * d,
-scale_visco = 2.66e-9,//この値は,結晶のNbを想定している可能性がある
-scale_force = pow(fq, 2.0) / (2 * M_PI * mu_vac * pow(real_lambda, 3.0)),
-scale_time = scale_length * scale_visco / scale_force,
-scale_velocity = scale_length / scale_time,
-scale_temp = pow(fq, 2.0) * real_d * dt / (4 * M_PI * mu_vac * boltzmann * pow(real_lambda, 2.0));
+scale_visco = 2.66e-9,//この値は,結晶のNbを想定している可能性がある（粘性抵抗31.29E-9でも可能）
+scale_force = pow(fq, 2.0) / (2 * M_PI * mu_vac * pow(real_lambda, 3.0)), //f0(定数）
+scale_time = scale_length * scale_visco / scale_force, //スケールの長さをスケールの速さで割っている（スケールの速さ＝粘性抵抗/力）
+scale_velocity = scale_length / scale_time, //ボルテックスのスケール速さ
+scale_temp = pow(fq, 2.0) * real_d * dt / (4 * M_PI * mu_vac * boltzmann * pow(real_lambda, 2.0)); //実験温度
 
 double
 Kt = sqrt(4 * M_PI * mu_vac * boltzmann * pow(real_lambda, 2.0) * set_temp / (pow(fq, 2.0) * real_d * dt));
@@ -230,18 +230,18 @@ real_f0 = scale_force * f0,
 Lorentz_x = scale_force * f0 * Klx,//x軸方向の単位長さあたりのローレンツ力
 Lorentz_y = scale_force * f0 * Kly,
 
-real_Eta = scale_visco * Eta,//この値は,結晶のNbを想定している可能性がある
+real_Eta = scale_visco * Eta,//この値は,結晶のNbを想定している可能性がある（粘性抵抗？）
 
 real_total_time = scale_time * total_step * dt,
 real_time_step = scale_time * dt,
 
 temp = scale_temp * pow(Kt, 2.0);
 
-rand_gauss* gauss = new rand_gauss();//
+rand_gauss* gauss = new rand_gauss(); //ガウスの正規分布
 
 double  R_standard_min, R_standard_max, dR_standard, Rl_ratio, Rm_ratio, Rs_ratio;
 
-double PinningMeshPos_X[Np][2];
+double PinningMeshPos_X[Np][2]; //ピニングサイトの位置？
 double PinningMeshPos_Y[Np][2];
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*main関数																						*/
@@ -278,7 +278,8 @@ int main()
 		printf("%s file opened!\n", "variable_R_ratio.txt");
 	}
 	fscanf_s(fpin, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &R_standard_min, &R_standard_max, &dR_standard, &Rl_ratio, &Rm_ratio, &Rs_ratio,&Dp_L2M,&Dp_M2S,
-														&Dp_S2L_min,&Dp_S2L_max,&dDp_S2L);
+														&Dp_S2L_min,&Dp_S2L_max,&dDp_S2L); //variable_R_ratio.txtからパラメーターの読み取り
+
 	//fscanf_s(fpin, "%lf %lf %lf %lf %lf %lf %lf %lf %lf", &R_standard_min, &R_standard_max, &dR_standard, &Rl_ratio, &Rm_ratio, &Rs_ratio, &Dp_L2M, &Dp_M2S, &Dp_S2L);
 	//printf("%.3f %.3f %.3f %.3f %.3f %.3f\n", R_standard_min, R_standard_max, dR_standard, Rl_ratio, Rm_ratio, Rs_ratio);
     fclose(fpin);
@@ -291,7 +292,7 @@ int main()
 	/*		これを行わないと、前の計算ファイルに上書き(or追記)されてしまう					*/
 	/*																						*/
 	/****************************************************************************************/
-	err_2 = fopen_s(&f_number_save, "num_data_save.txt", "r");//fileを開く。失敗するとエラー
+	err_2 = fopen_s(&f_number_save, "num_data_save.txt", "r");//fileを開く。失敗するとエラー(エラーの場合err=0)
 	if (err != 0) {
 		printf("%s file not open!\n", "num_data_save.txt");
 		return err;
@@ -445,8 +446,8 @@ int main()
 				, PROGRAM_NAME, PROGRAM_NUM
 				, PROGRAM_NAME, save_num
 				, abs(variable)
-				, PROGRAM_NAME, PROGRAM_NUM, save_num);
-			sprintf_s(dir_1, "./%s_%d", PROGRAM_NAME, PROGRAM_NUM);
+				, PROGRAM_NAME, PROGRAM_NUM, save_num); //配列の要素を作成
+			sprintf_s(dir_1, "./%s_%d", PROGRAM_NAME, PROGRAM_NUM); //
 			sprintf_s(dir_2, "./%s_%d/%s_file_%d", PROGRAM_NAME, PROGRAM_NUM, PROGRAM_NAME, save_num);
 			sprintf_s(dir_3, "./%s_%d/%s_file_%d/variable_%f", PROGRAM_NAME, PROGRAM_NUM, PROGRAM_NAME, save_num, abs(variable));
 			if (_mkdir(dir_1) == 0) { printf("SUCCESS\n"); }
@@ -470,7 +471,7 @@ int main()
 			else { printf("FAILED\n"); }
 #endif
 			errno_t err;
-			if ((err = fopen_s(&fp, filename, "a")) == NULL)
+			if ((err = fopen_s(&fp, filename, "a")) == NULL) //追加モード
 			{
 				fprintf(stderr, "file open error %s\n", fp);
 			}
@@ -1105,7 +1106,7 @@ void output_file(double* cd, double*ps ,double* fc,double*fc_vvi_p,double*fc_vvi
 //				相互作用、ピニング力、ローレンツ力、熱揺らぎ、それぞれ独立して扱えるようにした。
 void calc_f(double* cd, double* fc, double*fc_vvi_p,double*fc_vvi_m,double*fc_pin,double*fc_Lor,double*fc_tho, double* vl, double* ps, double side, double side_x, double side_y)
 {
-	int pn = N;
+	int pn = N; //ピニングサイトの数？
 	//double a = Dp_S2L;
 	int i, j,k;
 	double dd[3] = { 0,0,0 };
@@ -1168,13 +1169,13 @@ void calc_f(double* cd, double* fc, double*fc_vvi_p,double*fc_vvi_m,double*fc_pi
 			if (rd < cut_off2)//fvvカットオフ判定
 			{
 				tmp = fvv(sqrt(rd))/ r;
-				df[1] = tmp * dd[1];
-				df[2] = tmp * dd[2];
+				df[1] = tmp * dd[1]; //斜め方向のVVIのx成分？
+				df[2] = tmp * dd[2]; //斜め方向のVVIのy成分？
 
 				fc[i + 1] += df[1];//X作用
 				fc_vvi_p[i + 1] += df[1];
 				fc[i + 2] += df[2];//Y作用
-				fc_vvi_p[i + 2] += df[1];
+				fc_vvi_p[i + 2] += df[2];
 
 				fc[j + 1] -= df[1];//X反作用
 				fc_vvi_m[i] = (j/3)+1.0;		//どのボルテックスと相互作用しあっているか？(解析用)
@@ -1203,12 +1204,12 @@ void calc_f(double* cd, double* fc, double*fc_vvi_p,double*fc_vvi_m,double*fc_pi
 
 			rd = dd[1] * dd[1] + dd[2] * dd[2];
 
-			ddPin[k / 3][1] = dd[1];
-			ddPin[k / 3][2] = dd[2];
+			ddPin[k / 3][1] = dd[1]; //n個目のボルテックスのｘ座標?
+			ddPin[k / 3][2] = dd[2]; //n個目のボルテックスのy座標?
 
 
 
-			rpin[k/3] = sqrt(rd);
+			rpin[k/3] = sqrt(rd); //ボルテックス間の斜めの距離
 
 			if (rpin[k / 3] <= ps[k]) {
 				pinningInflag++;
@@ -1257,10 +1258,10 @@ void calc_f(double* cd, double* fc, double*fc_vvi_p,double*fc_vvi_m,double*fc_pi
 		}
 
 
-		fc[i + 1] += df[1];
-		fc_pin[i + 1] = df[1];
+		fc[i + 1] += df[1]; //
+		fc_pin[i + 1] = df[1]; //ボルテックスにかかるピニング力
 		fc[i + 2] += df[2];
-		fc_pin[i + 2] = df[2];
+		fc_pin[i + 2] = df[2]; //ボルテックスにかかるピニング力
 #endif
 
 		//粘性抵抗っぽいの
@@ -1302,13 +1303,13 @@ void calc_f(double* cd, double* fc, double*fc_vvi_p,double*fc_vvi_m,double*fc_pi
 void set_pinning_site_3(double* ps, double side, double Rl, double Rm, double Rs)
 {
 	int i;
-	double SiteDis_S2L = Dp_S2L - Rs - Rl;
-	double SiteDis_L2M = Dp_L2M - Rl - Rm;
-	double SiteDis_M2S = Dp_M2S - Rm - Rs;
+	double SiteDis_S2L = Dp_S2L - Rs - Rl; //円間距離S2L(中心間ではない）
+	double SiteDis_L2M = Dp_L2M - Rl - Rm; //円間距離L2M(中心間ではない）
+	double SiteDis_M2S = Dp_M2S - Rm - Rs; //円間距離M2S(中心間ではない）
 
-	double boxLargeX = (SiteDis_S2L / 2) + (2 * Rl) + (SiteDis_L2M / 2);
-	double boxMiddleX = (SiteDis_L2M / 2) + (2 * Rm) + (SiteDis_M2S / 2);
-	double boxSmallX = (SiteDis_M2S / 2) + (2 * Rs) + (SiteDis_S2L / 2);
+	double boxLargeX = (SiteDis_S2L / 2) + (2 * Rl) + (SiteDis_L2M / 2); //S2Lの中心～L2Mの中心
+	double boxMiddleX = (SiteDis_L2M / 2) + (2 * Rm) + (SiteDis_M2S / 2); //L2Mの中心～M2Sの中心
+	double boxSmallX = (SiteDis_M2S / 2) + (2 * Rs) + (SiteDis_S2L / 2); //M2Sの中心～S2Lの中心
 	//初期化
 	for (i = 0; i < N * 3; i++)
 	{
@@ -1604,9 +1605,9 @@ void set_pinning_site_2(double* ps, double side, double Rl, double Rs)
 /****************************************************************************************/
 double fvv(const double r)
 {
-	double f;
+	double f; //Fvv=f0*e^(-r/λ)
 	
-	f = f0 * pow(2.71828182846, -(r / lambda));
+	f = f0 * pow(2.71828182846, -(r / lambda)); //e=2.71828182846
 	//f = f0 * gsl_sf_bessel_I1_e(-(r / lambda),);
 	return f;
 }
@@ -1638,7 +1639,7 @@ double fp(const double r)
 /****************************************************************************************/
 double fp_step(const double r,const double basis)
 {
-	double fp;
+	double fp; //Fp=-Kpfo/(cosh(r/Lp))^2
 	if (r > basis) {
 		return 0;
 	}
@@ -1903,7 +1904,7 @@ void set_cd_ps_duo_and_vl(double* cd, double* vl, double side, double side_x, do
 	int i;
 	int check;
 
-	double SiteDis_L2S= Dp_L2M + Dp_M2S - Rl - Rs;
+	double SiteDis_L2S= Dp_L2M + Dp_M2S - Rl - Rs; //LとSの円間距離
 	double pinning_flag = 0;
 	for (i = 0; i < N * 3; i += 3)
 	{

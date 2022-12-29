@@ -69,7 +69,7 @@ SENTENSE(XX年YY月ZZ日)
 #endif
 
 
-#define OUTPUT_CD_VIEW_FILE //cd_viewファイルが要らなければ,コメントアウトしてください
+//#define OUTPUT_CD_VIEW_FILE //cd_viewファイルが要らなければ,コメントアウトしてください
 
 #define VARIABLE     //変数を導入するか
 #define CHANGE_KLX   //ローレンツ力を変数として動かすか
@@ -103,7 +103,7 @@ SENTENSE(XX年YY月ZZ日)
 #define NX		3
 #define NY		3
 
-#define PP		(Np/3) //一行あたりのピニングサイトの数
+#define PP		(Np/3) //列の数
 //#define STOP 1.37e-17	//struve_H1用
 #define K1(x) gsl_sf_bessel_K1(x)	//1次の第二種ベッセル(＝第二種変形ベッセル関数）
 
@@ -170,7 +170,7 @@ lambda = 1.0,
 //lambda = 10.0,
 Lambda = 2 * lambda / tanh(d / lambda),
 //Dp = 4.0,
-Dp = 16,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
+Dp = 3.5,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
 
 //2021追加分
 /*PSLargeとPSMiddle間の中心間距離。PSMiddleとPSSmall間の中心間距離。PSSmallとPSLarge間の中心間距離。*/
@@ -190,7 +190,7 @@ fq = 2.068e-15, //ボルテックスの値
 mu_vac = 4 * M_PI * pow(10.0, -7.0), //真空の透磁率
 boltzmann = 1.381e-23;
 
-double    variable;
+double    variable; //変数（CHANGE～の関数で用いる）
 //double    set_temp = 8.4;      //実際の温度を何[K]に設定するか
 double    set_temp = 4.2;
 
@@ -338,7 +338,8 @@ int main()
 		printf("%.3f %.3f %.3f\n", Dp_L2M, Dp_M2S, Dp_S2L);
 
 		//double min_variable = 1.000, max_variable = 2.070 + 0.0001, d_variable = 0.01;        //変数の定義域や刻み幅を設定 0.001
-		double min_variable = 1.860, max_variable = 2.070 + 0.0001, d_variable = 0.001;
+		double min_variable = 1.860, max_variable = 2.070 + 0.0001, d_variable = 0.001; //Klxを変数にする場合採用
+		//double min_variable = 3.5, max_variable = 5 + 0.0001, d_variable = 0.5; //Dpを変数にする場合(試行段階）
 		//double min_variable = 1.780, max_variable = 1.850 + 0.0001, d_variable = 0.01;
 		//double min_variable = 1.900, max_variable = 2.070 + 0.0001, d_variable = 0.001;        //変数の定義域や刻み幅を設定 0.001
 #ifdef OUTPUT_CD_VIEW_FILE
@@ -419,9 +420,9 @@ int main()
 			double side_x = (Np/6)*(Dp_L2M + Dp_M2S + Dp_S2L); //444でピニングサイト構成する際はこっち
 			double side_y = Dp * NY;		//　計算で使用する一周期範囲Y
 			//double side_y = Dp_L2M + Dp_M2S + Dp_S2L;
-			double sideh = side / 2;
-			double sideh_x = side_x / 2.0;
-			double sideh_y = side_y / 2.0;
+			double sideh = side / 2; //sideharf
+			double sideh_x = side_x / 2.0; //side_xの半分
+			double sideh_y = side_y / 2.0; //side_yの半分
 #endif
 			double cut_off2 = 36.0;
 			double
@@ -966,12 +967,12 @@ int main()
 #ifdef CHANGE_DP
 		FILE* file_1;
 		char fn_1[128];
-		sprintf(fn_1, "./%s_%d/%s_file_%d/%s_%d_%d.txt", PROGRAM_NAME, PROGRAM_NUM, PROGRAM_NAME, save_num, PROGRAM_NAME, PROGRAM_NUM, save_num);
-		if ((file_1 = fopen(fn_1, "a")) == NULL)
+		sprintf_s(fn_1, "./%s_%d/%s_file_%d/%s_%d_%d.txt", PROGRAM_NAME, PROGRAM_NUM, PROGRAM_NAME, save_num, PROGRAM_NAME, PROGRAM_NUM, save_num);
+		if (( err = fopen_s(&file_1, fn_1, "a")) == NULL)
 		{
-			fprintf(stderr, "file open error %s\n", fn_1);
+			fprintf_s(stderr, "file open error %s\n", fn_1);
 		}
-		fprintf(file_1, "%e %e %e %e\n", Dp, mean_V, real_Dp, real_mean_V);
+		fprintf_s(file_1, "%e %e %e %e\n", Dp, mean_V, real_Dp, real_mean_V);
 		fclose(file_1);
 #endif
 #ifdef CHANGE_KT
@@ -1169,18 +1170,18 @@ void calc_f(double* cd, double* fc, double*fc_vvi_p,double*fc_vvi_m,double*fc_pi
 			if (rd < cut_off2)//fvvカットオフ判定
 			{
 				tmp = fvv(sqrt(rd))/ r;
-				df[1] = tmp * dd[1]; //斜め方向のVVIのx成分？
-				df[2] = tmp * dd[2]; //斜め方向のVVIのy成分？
+				df[1] = tmp * dd[1]; //斜め方向のVVIのx成分
+				df[2] = tmp * dd[2]; //斜め方向のVVIのy成分
 
 				fc[i + 1] += df[1];//X作用
 				fc_vvi_p[i + 1] += df[1];
 				fc[i + 2] += df[2];//Y作用
 				fc_vvi_p[i + 2] += df[2];
 
-				fc[j + 1] -= df[1];//X反作用
-				fc_vvi_m[i] = (j/3)+1.0;		//どのボルテックスと相互作用しあっているか？(解析用)
+				fc[j + 1] -= df[1]; //X反作用
+				fc_vvi_m[i] = (j/3)+1.0; //どのボルテックスと相互作用しあっているか？(解析用)
 				fc_vvi_m[j + 1] -= df[1];
-				fc[j + 2] -= df[2];//Y反作用
+				fc[j + 2] -= df[2]; //Y反作用
 				fc_vvi_m[j + 1] -= df[2];
 			}
 		}

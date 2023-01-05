@@ -170,9 +170,9 @@ lambda = 1.0,
 //lambda = 10.0,
 Lambda = 2 * lambda / tanh(d / lambda),
 //Dp = 4.0,
-Dp = 3.5,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
+Dp = 16.0,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
 
-//2021追加分
+//2021追加
 /*PSLargeとPSMiddle間の中心間距離。PSMiddleとPSSmall間の中心間距離。PSSmallとPSLarge間の中心間距離。*/
 Dp_L2M = 10,
 Dp_M2S = 10,
@@ -197,7 +197,9 @@ double    set_temp = 4.2;
 double	  dt = 0.001;
 //int       period = 10000000;
 //int       period = 100000;      //ローレンツ力の周期 20Mhz
-int		  period = 25000;		//5Mhz　周期
+//int		  period = 25000;		5Mhz　周期
+int		  period = 50000;		//5Mhz　周期
+
 int       change_pm = period / 2; //ローレンツ力の±を切り替える 50000 (periodが半分まで到達したら±切り替える)
 int       N_period = 3;        //交流で何周期分計算するか(左右にローレンツ力を何回振るか)
 int       total_step = N_period * period; //トータルの周期、時間
@@ -321,7 +323,8 @@ int main()
 
 #ifdef VARIABLE
 	double R_standard=R_standard_min;
-	//for (R_standard = R_standard_min; R_standard <= R_standard_max; R_standard += dR_standard)
+	//for(Dp=1;Dp<=3;Dp+=1) //Dp変化
+	//for (R_standard = R_standard_min; R_standard <= R_standard_max; R_standard += dR_standard) //円の大きさ変更
 	for (Dp_S2L = Dp_S2L_min; Dp_S2L <= Dp_S2L_max; Dp_S2L += dDp_S2L)
 	{
 		double

@@ -51,7 +51,7 @@ def main():
             data_list.append(d.split(','))
 
         #データフレームに格納された数値を全て小数にする
-        df = pd.DataFrame(data_list,columns = ['a','b','c','d','e','Rl','g','Rs','Dp_L2M','j','Dp_S2L']) #右から1,3,4,6
+        df = pd.DataFrame(data_list,columns = ['a','b','c','d','e','Rl','g','Rs','Dp_L2M','j','Dp_S2L','Dp']) #右から1,3,4,6
         df['a'] = df['a'].astype(float)
         df['b'] = df['b'].astype(float)
         df['c'] = df['c'].astype(float)
@@ -64,6 +64,8 @@ def main():
         df['j'] = df['j'].astype(float)
         df['Dp_S2L'] = df['Dp_S2L'].str.replace('\n','')
         df['Dp_S2L'] = df['Dp_S2L'].astype(float)
+        df['Dp'] = df['Dp'].astype(float)
+
 
         #サイクルの情報
         one_cycle = get_cycle_info(df)['one_cycle']
@@ -82,16 +84,17 @@ def main():
             Rs = df1['Rs'].iloc[0]
             L2M = df1['Dp_L2M'].iloc[0]
             S2L = df1['Dp_S2L'].iloc[0]
+            Dp = df1['Dp'].iloc[0]
             fig = plt.figure()
             plt.scatter(df1['a'],df1['b'])
             plt.scatter(df1['a'],df1['c'])
             plt.scatter(df1['a'],df1['d'])
             graph_title = ntpath.basename(file).replace('.txt','')
-            plt.title('{0}(b={1},Rl={2},Rs={3},Dp_L2M={4},Dp_S2L={5})'.format(graph_title,abs_max,Rl,Rs,L2M,S2L)) #Rl=6番目、Rs=4番目、Dp_L2M=3番目、Dp_S2L = 1番目
+            plt.title('{0}(b={1},Rl={2},Rs={3},Dp_L2M={4},Dp_S2L={5},Dp={6})'.format(graph_title,abs_max,Rl,Rs,L2M,S2L,Dp)) #Rl=6番目、Rs=4番目、Dp_L2M=3番目、Dp_S2L = 1番目
             plt.xlabel('Fl/Fp')
             plt.ylabel('V_Ave')
             plt.show()
-            fig.savefig('{0}(b={1},Rl={2},Rs={3},Dp_L2M={4},Dp_S2L={5}).png'.format(save_fig_path,abs_max,Rl,Rs,L2M,S2L))
+            fig.savefig('{0}(b={1},Rl={2},Rs={3},Dp_L2M={4},Dp_S2L={5},Dp={6}).png'.format(save_fig_path,abs_max,Rl,Rs,L2M,S2L,Dp))
             df = df.drop(range(one_cycle))
             df = df.reset_index(drop=True)
 

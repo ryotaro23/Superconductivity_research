@@ -1,4 +1,4 @@
-1.0 1.0 0 0.3 0 0.1 5.0 5.0 1 10 0.5
+1.0 1.0 0.1 0.5 0 0.17 5.0 5.0 0.87 1.37 0.5
 R_standard_min, R_standard_max, dR_standard, Rl_ratio, Rm_ratio, Rs_ratio, Dp_L2M, Dp_M2S,DpS2L_min,DpS2L_max,dDpS2L;
 
 Rs=0.5um   0.25

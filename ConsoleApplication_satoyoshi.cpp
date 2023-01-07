@@ -170,7 +170,7 @@ lambda = 1.0,
 //lambda = 10.0,
 Lambda = 2 * lambda / tanh(d / lambda),
 //Dp = 4.0,
-Dp = 16.0,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
+Dp = 1,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
 
 //2021追加
 /*PSLargeとPSMiddle間の中心間距離。PSMiddleとPSSmall間の中心間距離。PSSmallとPSLarge間の中心間距離。*/
@@ -323,7 +323,7 @@ int main()
 
 #ifdef VARIABLE
 	double R_standard=R_standard_min;
-	//for(Dp=1;Dp<=3;Dp+=1) //Dp変化
+	for(Dp=1;Dp<=1.5;Dp+=0.5) //Dp変化
 	//for (R_standard = R_standard_min; R_standard <= R_standard_max; R_standard += dR_standard) //円の大きさ変更
 	for (Dp_S2L = Dp_S2L_min; Dp_S2L <= Dp_S2L_max; Dp_S2L += dDp_S2L)
 	{
@@ -962,7 +962,7 @@ int main()
 		}
 		
 		//fprintf_s(file_1, "%e %e %e %e %e %e %e\n", R_standard_min, R_standard_max, dR_standard, Rl_ratio, Rm_ratio, Rs_ratio);
-		fprintf_s(file_1, "%e, %e, %e, %e, %e, %e, %e, %e, %e, %e, %e\n", fabs(Klx) / Kp, mean_V, mean_V_plus, mean_V_minus, mean_V_plus + mean_V_minus,Rl,Rm,Rs,Dp_L2M,Dp_M2S,Dp_S2L);
+		fprintf_s(file_1, "%e, %e, %e, %e, %e, %e, %e, %e, %e, %e, %e, %e\n", fabs(Klx) / Kp, mean_V, mean_V_plus, mean_V_minus, mean_V_plus + mean_V_minus,Rl,Rm,Rs,Dp_L2M,Dp_M2S,Dp_S2L,Dp);
 		fprintf_s(file_2, "%e, %e, %e, %e, %e, %e, %e, %e, %e\n", fabs(Klx) / Kp, mean_V, V_Row[0]/(N*total_step),V_Row[1] / (N * total_step),V_Row[2] / (N * total_step),V_Col[0] / (N * total_step),V_Col[1] / (N * total_step),V_Col[2] / (N * total_step),V_Col[3] / (N * total_step));
 		fclose(file_1);
 		fclose(file_2);

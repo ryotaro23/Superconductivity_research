@@ -170,7 +170,7 @@ lambda = 1.0,
 //lambda = 10.0,
 Lambda = 2 * lambda / tanh(d / lambda),
 //Dp = 4.0,
-Dp = 1,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
+Dp = 16,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
 
 //2021追加
 /*PSLargeとPSMiddle間の中心間距離。PSMiddleとPSSmall間の中心間距離。PSSmallとPSLarge間の中心間距離。*/
@@ -198,7 +198,7 @@ double	  dt = 0.001;
 //int       period = 10000000;
 //int       period = 100000;      //ローレンツ力の周期 20Mhz
 //int		  period = 25000;		5Mhz　周期
-int		  period = 50000;		//5Mhz　周期
+int		  period = 100000;		//5Mhz　周期
 
 int       change_pm = period / 2; //ローレンツ力の±を切り替える 50000 (periodが半分まで到達したら±切り替える)
 int       N_period = 3;        //交流で何周期分計算するか(左右にローレンツ力を何回振るか)
@@ -243,8 +243,8 @@ rand_gauss* gauss = new rand_gauss(); //ガウスの正規分布
 
 double  R_standard_min, R_standard_max, dR_standard, Rl_ratio, Rm_ratio, Rs_ratio;
 
-double PinningMeshPos_X[Np][2]; //ピニングサイトの位置？
-double PinningMeshPos_Y[Np][2];
+double PinningMeshPos_X[Np][2]; //ピニング力の及ぶ領域（X方向)
+double PinningMeshPos_Y[Np][2]; //ピニング力の及ぶ領域（Y方向)
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*main関数																						*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -323,7 +323,7 @@ int main()
 
 #ifdef VARIABLE
 	double R_standard=R_standard_min;
-	for(Dp=1;Dp<=1.5;Dp+=0.5) //Dp変化
+	//for(Dp=1;Dp<=1.5;Dp+=0.5) //Dp変化
 	//for (R_standard = R_standard_min; R_standard <= R_standard_max; R_standard += dR_standard) //円の大きさ変更
 	for (Dp_S2L = Dp_S2L_min; Dp_S2L <= Dp_S2L_max; Dp_S2L += dDp_S2L)
 	{
@@ -1132,7 +1132,7 @@ void calc_f(double* cd, double* fc, double*fc_vvi_p,double*fc_vvi_m,double*fc_pi
 	int pinningInflag;
 	int pinningEffectiveflag;
 
-	double HealLen=2.0;
+	double HealLen=2.0; //ピニングサイトの外側のfpの及ぶ領域
 
 
 	//ピニングポテンシャルの重なり部分を打ち消す際に考慮。
@@ -1245,7 +1245,7 @@ void calc_f(double* cd, double* fc, double*fc_vvi_p,double*fc_vvi_m,double*fc_pi
 
 			//22.01.19 ピニングポテンシャルの重なりを無視できるようなコーディングに着手(未完成)
 			
-			if((PinningMeshPos_X[k/3][0] < cd[i+1]) && (PinningMeshPos_X[k/3][1] > cd[i+1]) && pinningInflag==0)
+			if((PinningMeshPos_X[k/3][0] < cd[i+1]) && (PinningMeshPos_X[k/3][1] > cd[i+1]) && (PinningMeshPos_Y[k / 3][0] < cd[i + 2]) && (PinningMeshPos_Y[k / 3][1] > cd[i + 2]) && pinningInflag==0)
 			{
 				if (rpin[k/3] == 0.0)
 				{
@@ -1310,10 +1310,16 @@ void set_pinning_site_3(double* ps, double side, double Rl, double Rm, double Rs
 	double SiteDis_S2L = Dp_S2L - Rs - Rl; //円間距離S2L(中心間ではない）
 	double SiteDis_L2M = Dp_L2M - Rl - Rm; //円間距離L2M(中心間ではない）
 	double SiteDis_M2S = Dp_M2S - Rm - Rs; //円間距離M2S(中心間ではない）
+	double VerticalSiteDis_S2S = Dp - Rs - Rs; //円間距離S2S(中心間ではない）
+	double VerticalSiteDis_M2M = Dp - Rm - Rm; //円間距離M2M(中心間ではない）
+	double VerticalSiteDis_L2L = Dp - Rl - Rl; //円間距離L2L(中心間ではない）
 
 	double boxLargeX = (SiteDis_S2L / 2) + (2 * Rl) + (SiteDis_L2M / 2); //S2Lの中心～L2Mの中心
 	double boxMiddleX = (SiteDis_L2M / 2) + (2 * Rm) + (SiteDis_M2S / 2); //L2Mの中心～M2Sの中心
 	double boxSmallX = (SiteDis_M2S / 2) + (2 * Rs) + (SiteDis_S2L / 2); //M2Sの中心～S2Lの中心
+	double boxLargeY = (VerticalSiteDis_L2L / 2) + (2 * Rl) + (VerticalSiteDis_L2L / 2); 
+	double boxMiddleY = (VerticalSiteDis_M2M / 2) + (2 * Rm) + (VerticalSiteDis_M2M / 2); 
+	double boxSmallY = (VerticalSiteDis_S2S / 2) + (2 * Rs) + (VerticalSiteDis_S2S / 2); 
 	//初期化
 	for (i = 0; i < N * 3; i++)
 	{
@@ -1359,9 +1365,26 @@ void set_pinning_site_3(double* ps, double side, double Rl, double Rm, double Rs
 			break;
 		
 		}
+		switch ((int)(i / (PP * 3)))
+		{//y方向ピニング力を及ぼすピニングサイトを特定する範囲を設定
+		case 0:
+			PinningMeshPos_Y[i / 3][0] = 0;
+			PinningMeshPos_Y[i / 3][1] = boxLargeY / 2 + Dp / 2;
+			break;
+		case 1:
+			PinningMeshPos_Y[i / 3][0] = boxLargeY / 2 + Dp / 2;
+			PinningMeshPos_Y[i / 3][1] = boxLargeY / 2 + Dp / 2 + boxLargeY;
+			break;
+		case 2:
+			PinningMeshPos_Y[i / 3][0] = boxLargeY / 2 + Dp / 2 + boxLargeY;
+			PinningMeshPos_Y[i / 3][1] = boxLargeY / 2 + Dp / 2 + boxLargeY + boxLargeX;
+			break;
+
+		}
 		//PSのX座標配置
 		//ps[i + 1] = Dp * (double)(i % (sqrNp * 3)) / 3.0 + Dp / 2.0;//x   //sqrNp*3 = (大中小の数？)×(i,i+1,i+2の数一組)
 		//ps[i + 1] = Dp_L * (double)(i % (sqrNp * 3)) / 3.0 + Dp / 2.0;
+		
 		//PSのY座標配置
 		ps[i + 2] = Dp * (int)(i / (PP * 3)) + Dp / 2.0;//y
 
@@ -1518,9 +1541,13 @@ void set_pinning_site_2(double* ps, double side, double Rl, double Rs)
 	int i;
 	double SiteDis_S2L = Dp_S2L - Rs - Rl;
 	double SiteDis_L2S = Dp_L2M + Dp_M2S - Rl - Rs;
+	double VerticalSiteDis_S2S = Dp - Rs - Rs; //円間距離S2S(中心間ではない）
+	double VerticalSiteDis_L2L = Dp - Rl - Rl; //円間距離L2L(中心間ではない）
 
 	double boxSmallX = (SiteDis_S2L / 2) + (2 * Rs) + (SiteDis_L2S / 2);
 	double boxLargeX = (SiteDis_S2L / 2) + (2 * Rl) + (SiteDis_L2S / 2);
+	double boxLargeY = (VerticalSiteDis_L2L / 2) + (2 * Rl) + (VerticalSiteDis_L2L / 2);
+	double boxSmallY = (VerticalSiteDis_S2S / 2) + (2 * Rs) + (VerticalSiteDis_S2S / 2);
 
 	//初期化
 	for (i = 0; i < N * 3; i++)
@@ -1576,9 +1603,26 @@ void set_pinning_site_2(double* ps, double side, double Rl, double Rs)
 			break;
 				
 		}
+		switch ((int)(i / (PP * 3)))
+		{//y方向ピニング力を及ぼすピニングサイトを特定する範囲を設定
+		case 0:
+			PinningMeshPos_Y[i / 3][0] = 0;
+			PinningMeshPos_Y[i / 3][1] = boxLargeY / 2 + Dp / 2;
+			break;
+		case 1:
+			PinningMeshPos_Y[i / 3][0] = boxLargeY / 2 + Dp / 2;
+			PinningMeshPos_Y[i / 3][1] = boxLargeY / 2 + Dp / 2 + boxLargeY;
+			break;
+		case 2:
+			PinningMeshPos_Y[i / 3][0] = boxLargeY / 2 + Dp / 2 + boxLargeY;
+			PinningMeshPos_Y[i / 3][1] = boxLargeY / 2 + Dp / 2 + boxLargeY + boxLargeX;
+			break;
+
+		}
 		//PSのX座標配置
 		//ps[i + 1] = Dp * (double)(i % (sqrNp * 3)) / 3.0 + Dp / 2.0;//x   //sqrNp*3 = (大中小の数？)×(i,i+1,i+2の数一組)
 		//ps[i + 1] = Dp_L * (double)(i % (sqrNp * 3)) / 3.0 + Dp / 2.0;
+		// 
 		//PSのY座標配置
 		ps[i + 2] = Dp * (int)(i / (PP * 3)) + Dp / 2.0;//y
 

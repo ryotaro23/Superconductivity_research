@@ -85,7 +85,7 @@ def main():
             L2M = df1['Dp_L2M'].iloc[0]
             S2L = df1['Dp_S2L'].iloc[0]
             Dp = df1['Dp'].iloc[0]
-            fig = plt.figure()
+            fig = plt.figure(figsize=(10,6))
             plt.scatter(df1['a'],df1['b'])
             plt.scatter(df1['a'],df1['c'])
             plt.scatter(df1['a'],df1['d'])
@@ -93,8 +93,9 @@ def main():
             plt.title('{0}(b={1},Rl={2},Rs={3},Dp_L2M={4},Dp_S2L={5},Dp={6})'.format(graph_title,abs_max,Rl,Rs,L2M,S2L,Dp)) #Rl=6番目、Rs=4番目、Dp_L2M=3番目、Dp_S2L = 1番目
             plt.xlabel('Fl/Fp')
             plt.ylabel('V_Ave')
-            plt.show()
+            plt.pause(1)
             fig.savefig('{0}(b={1},Rl={2},Rs={3},Dp_L2M={4},Dp_S2L={5},Dp={6}).png'.format(save_fig_path,abs_max,Rl,Rs,L2M,S2L,Dp))
+            plt.close()
             df = df.drop(range(one_cycle))
             df = df.reset_index(drop=True)
 

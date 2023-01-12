@@ -1307,19 +1307,19 @@ void calc_f(double* cd, double* fc, double*fc_vvi_p,double*fc_vvi_m,double*fc_pi
 void set_pinning_site_3(double* ps, double side, double Rl, double Rm, double Rs)
 {
 	int i;
-	double SiteDis_S2L = Dp_S2L - Rs - Rl; //円間距離S2L(中心間ではない）
-	double SiteDis_L2M = Dp_L2M - Rl - Rm; //円間距離L2M(中心間ではない）
-	double SiteDis_M2S = Dp_M2S - Rm - Rs; //円間距離M2S(中心間ではない）
-	double VerticalSiteDis_S2S = Dp - Rs - Rs; //円間距離S2S(中心間ではない）
-	double VerticalSiteDis_M2M = Dp - Rm - Rm; //円間距離M2M(中心間ではない）
-	double VerticalSiteDis_L2L = Dp - Rl - Rl; //円間距離L2L(中心間ではない）
+	double SiteDisX_S2L = Dp_S2L - Rs - Rl; //円間距離S2L(中心間ではない）
+	double SiteDisX_L2M = Dp_L2M - Rl - Rm; //円間距離L2M(中心間ではない）
+	double SiteDisX_M2S = Dp_M2S - Rm - Rs; //円間距離M2S(中心間ではない）
+	double SiteDisY_S2S = Dp - Rs - Rs; //円間距離S2S(中心間ではない）
+	double SiteDisY_M2M = Dp - Rm - Rm; //円間距離M2M(中心間ではない）
+	double SiteDisY_L2L = Dp - Rl - Rl; //円間距離L2L(中心間ではない）
 
-	double boxLargeX = (SiteDis_S2L / 2) + (2 * Rl) + (SiteDis_L2M / 2); //S2Lの中心～L2Mの中心
-	double boxMiddleX = (SiteDis_L2M / 2) + (2 * Rm) + (SiteDis_M2S / 2); //L2Mの中心～M2Sの中心
-	double boxSmallX = (SiteDis_M2S / 2) + (2 * Rs) + (SiteDis_S2L / 2); //M2Sの中心～S2Lの中心
-	double boxLargeY = (VerticalSiteDis_L2L / 2) + (2 * Rl) + (VerticalSiteDis_L2L / 2); 
-	double boxMiddleY = (VerticalSiteDis_M2M / 2) + (2 * Rm) + (VerticalSiteDis_M2M / 2); 
-	double boxSmallY = (VerticalSiteDis_S2S / 2) + (2 * Rs) + (VerticalSiteDis_S2S / 2); 
+	double boxLargeX = (SiteDisX_S2L / 2) + (2 * Rl) + (SiteDisX_L2M / 2); //S2Lの中心～L2Mの中心
+	double boxMiddleX = (SiteDisX_L2M / 2) + (2 * Rm) + (SiteDisX_M2S / 2); //L2Mの中心～M2Sの中心
+	double boxSmallX = (SiteDisX_M2S / 2) + (2 * Rs) + (SiteDisX_S2L / 2); //M2Sの中心～S2Lの中心
+	double boxLargeY = (SiteDisY_L2L / 2) + (2 * Rl) + (SiteDisY_L2L / 2); 
+	double boxMiddleY = (SiteDisY_M2M / 2) + (2 * Rm) + (SiteDisY_M2M / 2); 
+	double boxSmallY = (SiteDisY_S2S / 2) + (2 * Rs) + (SiteDisY_S2S / 2); 
 	//初期化
 	for (i = 0; i < N * 3; i++)
 	{
@@ -1420,13 +1420,13 @@ void set_pinning_site_3(double* ps, double side, double Rl, double Rm, double Rs
 void set_pinning_site_3_2Pair(double* ps, double side, double Rl, double Rm, double Rs)
 {
 	int i;
-	double SiteDis_S2L = Dp_S2L - Rs - Rl;
-	double SiteDis_L2M = Dp_L2M - Rl - Rm;
-	double SiteDis_M2S = Dp_M2S - Rm - Rs;
+	double SiteDisX_S2L = Dp_S2L - Rs - Rl;
+	double SiteDisX_L2M = Dp_L2M - Rl - Rm;
+	double SiteDisX_M2S = Dp_M2S - Rm - Rs;
 
-	double boxLargeX = (SiteDis_S2L / 2) + (2 * Rl) + (SiteDis_L2M / 2);
-	double boxMiddleX = (SiteDis_L2M / 2) + (2 * Rm) + (SiteDis_M2S / 2);
-	double boxSmallX = (SiteDis_M2S / 2) + (2 * Rs) + (SiteDis_S2L / 2);
+	double boxLargeX = (SiteDisX_S2L / 2) + (2 * Rl) + (SiteDisX_L2M / 2);
+	double boxMiddleX = (SiteDisX_L2M / 2) + (2 * Rm) + (SiteDisX_M2S / 2);
+	double boxSmallX = (SiteDisX_M2S / 2) + (2 * Rs) + (SiteDisX_S2L / 2);
 
 	//初期化
 	for (i = 0; i < N * 3; i++)
@@ -1539,15 +1539,15 @@ void set_pinning_site_3_2Pair(double* ps, double side, double Rl, double Rm, dou
 void set_pinning_site_2(double* ps, double side, double Rl, double Rs)
 {
 	int i;
-	double SiteDis_S2L = Dp_S2L - Rs - Rl;
+	double SiteDisX_S2L = Dp_S2L - Rs - Rl;
 	double SiteDis_L2S = Dp_L2M + Dp_M2S - Rl - Rs;
-	double VerticalSiteDis_S2S = Dp - Rs - Rs; //円間距離S2S(中心間ではない）
-	double VerticalSiteDis_L2L = Dp - Rl - Rl; //円間距離L2L(中心間ではない）
+	double SiteDisY_S2S = Dp - Rs - Rs; //円間距離S2S(中心間ではない）
+	double SiteDisY_L2L = Dp - Rl - Rl; //円間距離L2L(中心間ではない）
 
-	double boxSmallX = (SiteDis_S2L / 2) + (2 * Rs) + (SiteDis_L2S / 2);
-	double boxLargeX = (SiteDis_S2L / 2) + (2 * Rl) + (SiteDis_L2S / 2);
-	double boxLargeY = (VerticalSiteDis_L2L / 2) + (2 * Rl) + (VerticalSiteDis_L2L / 2);
-	double boxSmallY = (VerticalSiteDis_S2S / 2) + (2 * Rs) + (VerticalSiteDis_S2S / 2);
+	double boxSmallX = (SiteDisX_S2L / 2) + (2 * Rs) + (SiteDis_L2S / 2);
+	double boxLargeX = (SiteDisX_S2L / 2) + (2 * Rl) + (SiteDis_L2S / 2);
+	double boxLargeY = (SiteDisY_L2L / 2) + (2 * Rl) + (SiteDisY_L2L / 2);
+	double boxSmallY = (SiteDisY_S2S / 2) + (2 * Rs) + (SiteDisY_S2S / 2);
 
 	//初期化
 	for (i = 0; i < N * 3; i++)
@@ -1615,7 +1615,7 @@ void set_pinning_site_2(double* ps, double side, double Rl, double Rs)
 			break;
 		case 2:
 			PinningMeshPos_Y[i / 3][0] = boxLargeY / 2 + Dp / 2 + boxLargeY;
-			PinningMeshPos_Y[i / 3][1] = boxLargeY / 2 + Dp / 2 + boxLargeY + boxLargeX;
+			PinningMeshPos_Y[i / 3][1] = boxLargeY / 2 + Dp / 2 + boxLargeY + boxLargeY;
 			break;
 
 		}

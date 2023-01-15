@@ -170,7 +170,7 @@ lambda = 1.0,
 //lambda = 10.0,
 Lambda = 2 * lambda / tanh(d / lambda),
 //Dp = 4.0,
-Dp = 16,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
+Dp = 15,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
 
 //2021追加
 /*PSLargeとPSMiddle間の中心間距離。PSMiddleとPSSmall間の中心間距離。PSSmallとPSLarge間の中心間距離。*/

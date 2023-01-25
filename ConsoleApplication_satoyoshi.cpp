@@ -170,7 +170,7 @@ lambda = 1.0,
 //lambda = 10.0,
 Lambda = 2 * lambda / tanh(d / lambda),
 //Dp = 4.0,
-Dp = 16.0,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
+Dp = 16,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
 
 //2021追加
 /*PSLargeとPSMiddle間の中心間距離。PSMiddleとPSSmall間の中心間距離。PSSmallとPSLarge間の中心間距離。*/
@@ -198,7 +198,7 @@ double	  dt = 0.001;
 //int       period = 10000000;
 //int       period = 100000;      //ローレンツ力の周期 20Mhz
 //int		  period = 25000;		5Mhz　周期
-int		  period = 50000;		//5Mhz　周期
+int		  period = 100000;		//5Mhz　周期
 
 int       change_pm = period / 2; //ローレンツ力の±を切り替える 50000 (periodが半分まで到達したら±切り替える)
 int       N_period = 3;        //交流で何周期分計算するか(左右にローレンツ力を何回振るか)
@@ -323,7 +323,7 @@ int main()
 
 #ifdef VARIABLE
 	double R_standard=R_standard_min;
-	//for(Dp=1;Dp<=3;Dp+=1) //Dp変化
+	for(Dp=3.0001;Dp<=8;Dp+=0.5) //Dp変化
 	//for (R_standard = R_standard_min; R_standard <= R_standard_max; R_standard += dR_standard) //円の大きさ変更
 	for (Dp_S2L = Dp_S2L_min; Dp_S2L <= Dp_S2L_max; Dp_S2L += dDp_S2L)
 	{
@@ -341,13 +341,14 @@ int main()
 		printf("%.3f %.3f %.3f\n", Dp_L2M, Dp_M2S, Dp_S2L);
 
 		//double min_variable = 1.000, max_variable = 2.070 + 0.0001, d_variable = 0.01;        //変数の定義域や刻み幅を設定 0.001
-		double min_variable = 1.860, max_variable = 2.070 + 0.0001, d_variable = 0.001; //Klxを変数にする場合採用
+		double min_variable = 1.650, max_variable = 2.070 + 0.0001, d_variable = 0.001; //Klxを変数にする場合採用
 		//double min_variable = 3.5, max_variable = 5 + 0.0001, d_variable = 0.5; //Dpを変数にする場合(試行段階）
-		//double min_variable = 1.780, max_variable = 1.850 + 0.0001, d_variable = 0.01;
+		//double min_variable = 1.2, max_variable = 1.5 + 0.0001, d_variable = 0.001;//最も小さい範囲
+		//double min_variable = 1.6, max_variable = 2.07 + 0.0001, d_variable = 0.001;//2番目に小さい範囲
 		//double min_variable = 1.900, max_variable = 2.070 + 0.0001, d_variable = 0.001;        //変数の定義域や刻み幅を設定 0.001
 #ifdef OUTPUT_CD_VIEW_FILE
-		min_variable = 1.965;
-		max_variable = 1.965 + 0.0001;
+		min_variable = 1.86;  //アニメーションで見たい値
+		max_variable = 1.86 + 0.0001;
 		//min_variable = 1.98;
 		//max_variable = 1.98 + 0.0001;
 		d_variable = 0.01;			//アニメーション用

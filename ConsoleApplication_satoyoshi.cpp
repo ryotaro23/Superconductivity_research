@@ -172,6 +172,7 @@ Lambda = 2 * lambda / tanh(d / lambda),
 //Dp = 4.0,
 Dp = 2.001,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
 Dp_pls = 10 - Dp/2,
+gapX = 5,
 
 //2021追加
 /*PSLargeとPSMiddle間の中心間距離。PSMiddleとPSSmall間の中心間距離。PSSmallとPSLarge間の中心間距離。*/
@@ -324,7 +325,7 @@ int main()
 
 #ifdef VARIABLE
 	double R_standard=R_standard_min;
-	for(Dp=3.001;Dp<=5.601;Dp+=0.5) //Dp変化
+	//for(Dp=3.001;Dp<=5.601;Dp+=0.5) //Dp変化
 	//for (R_standard = R_standard_min; R_standard <= R_standard_max; R_standard += dR_standard) //円の大きさ変更
 	for (Dp_S2L = Dp_S2L_min; Dp_S2L <= Dp_S2L_max; Dp_S2L += dDp_S2L)
 	{
@@ -336,6 +337,7 @@ int main()
 			real_Rl = scale_length * Rl,
 			real_Rm = scale_length * Rm,
 			real_Rs = scale_length * Rs,
+			Dp = 3.001;
 			Dp_pls = 10 - Dp / 2;
 
 
@@ -423,7 +425,7 @@ int main()
 			double side = Dp * sqrN;
 			//double side_x = Dp * NX;		//　計算で使用する一周期範囲X
 			//double side_x = Dp_L2M + Dp_M2S + Dp_S2L;
-			double side_x = (Np / 4) * (Dp_L2M + Dp_M2S + Dp_S2L); //44でピニングサイト構成する際はこっち
+			double side_x = (Np / 4) * (Dp_L2M + Dp_M2S + Dp_S2L)+gapX; //44でピニングサイト構成する際はこっち
 			//double side_x = (Np/6)*(Dp_L2M + Dp_M2S + Dp_S2L); //444でピニングサイト構成する際はこっち
 			double side_y = Dp * NY + 2*Dp_pls;		//　計算で使用する一周期範囲Y
 			//double side_y = Dp_L2M + Dp_M2S + Dp_S2L;
@@ -1616,6 +1618,8 @@ void set_pinning_site_2(double* ps, double side, double Rl, double Rs)
 		case 1:
 			PinningMeshPos_Y[i / 3][0] = boxLargeY / 2 + Dp / 2 + Dp_pls;
 			PinningMeshPos_Y[i / 3][1] = boxLargeY / 2 + Dp / 2 + Dp_pls + boxLargeY;
+			ps[i + 1] += gapX;
+			PinningMeshPos_X[i / 3][1] += gapX;
 			break;
 		case 2:
 			PinningMeshPos_Y[i / 3][0] = boxLargeY / 2 + Dp / 2 + Dp_pls + boxLargeY;
@@ -2001,6 +2005,14 @@ void set_cd_ps_duo_and_vl(double* cd, double* vl, double side, double side_x, do
 			break;
 		
 		}
+
+		switch ((int)(i / (PP * 3)))
+		{//y方向
+		case 1:
+			cd[i + 1] += gapX;
+			break;
+
+	}
 
 #ifdef PS_LAST_CD_RAND
 		if (i == N * 3 - 3) {

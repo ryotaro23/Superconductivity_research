@@ -69,7 +69,7 @@ SENTENSE(XX年YY月ZZ日)
 #endif
 
 
-//#define OUTPUT_CD_VIEW_FILE //cd_viewファイルが要らなければ,コメントアウトしてください
+#define OUTPUT_CD_VIEW_FILE //cd_viewファイルが要らなければ,コメントアウトしてください
 
 #define VARIABLE     //変数を導入するか
 #define CHANGE_KLX   //ローレンツ力を変数として動かすか
@@ -170,7 +170,7 @@ lambda = 1.0,
 //lambda = 10.0,
 Lambda = 2 * lambda / tanh(d / lambda),
 //Dp = 4.0,
-Dp = 2.001,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
+Dp = 1.501,		// 実際の系だとDp=40(4um)（多分縦方向の距離）
 Dp_pls = 10 - Dp/2,
 
 //2021追加
@@ -324,7 +324,7 @@ int main()
 
 #ifdef VARIABLE
 	double R_standard=R_standard_min;
-	for(Dp=3.001;Dp<=5.601;Dp+=0.5) //Dp変化
+	//for(Dp=2.001;Dp<=2.201;Dp+=0.5) //Dp変化
 	//for (R_standard = R_standard_min; R_standard <= R_standard_max; R_standard += dR_standard) //円の大きさ変更
 	for (Dp_S2L = Dp_S2L_min; Dp_S2L <= Dp_S2L_max; Dp_S2L += dDp_S2L)
 	{
@@ -349,8 +349,8 @@ int main()
 		//double min_variable = 1.780, max_variable = 1.850 + 0.0001, d_variable = 0.01;
 		//double min_variable = 1.900, max_variable = 2.070 + 0.0001, d_variable = 0.001;        //変数の定義域や刻み幅を設定 0.001
 #ifdef OUTPUT_CD_VIEW_FILE
-		min_variable = 1.965;
-		max_variable = 1.965 + 0.0001;
+		min_variable = 1.9;
+		max_variable = 1.9 + 0.0001;
 		//min_variable = 1.98;
 		//max_variable = 1.98 + 0.0001;
 		d_variable = 0.01;			//アニメーション用
@@ -1042,6 +1042,16 @@ void output_file(double* cd, double*ps ,double* fc,double*fc_vvi_p,double*fc_vvi
 
 	static int header_flag=0;
 
+	//i番目のボルテックスのxy座標プロット
+	char fn_2[128];
+	FILE* fp3;
+	errno_t err3;
+
+	//i+1番目のボルテックスのxy座標プロット
+	char fn_3[128];
+	FILE* fp4;
+	errno_t err4;
+
 
 	//char file_name2[128];
 	static int c = 0;
@@ -1054,6 +1064,9 @@ void output_file(double* cd, double*ps ,double* fc,double*fc_vvi_p,double*fc_vvi
 	sprintf_s(file_name, "./%s_%d/%s_file_%d/ANIME_cd%06d.txt", PROGRAM_NAME, PROGRAM_NUM, PROGRAM_NAME, save_num, fabs(variable), c++);
 #endif
 	sprintf_s(fn_1, "./%s_%d/%s_file_%d/%s_%d_%d_CD_FC.txt", PROGRAM_NAME, PROGRAM_NUM, PROGRAM_NAME, save_num, PROGRAM_NAME, PROGRAM_NUM, save_num);
+	sprintf_s(fn_2, "./%s_%d/%s_file_%d/%s_%d_%d_CD_XY(i).txt", PROGRAM_NAME, PROGRAM_NUM, PROGRAM_NAME, save_num, PROGRAM_NAME, PROGRAM_NUM, save_num);
+	sprintf_s(fn_3, "./%s_%d/%s_file_%d/%s_%d_%d_CD_XY(i+1).txt", PROGRAM_NAME, PROGRAM_NUM, PROGRAM_NAME, save_num, PROGRAM_NAME, PROGRAM_NUM, save_num);
+
 	if ((err = fopen_s(&fp, file_name, "wt")) == NULL)
 	{
 		fprintf(stderr, "file open error %s\n", file_name);
@@ -1061,6 +1074,14 @@ void output_file(double* cd, double*ps ,double* fc,double*fc_vvi_p,double*fc_vvi
 	if ((err2 = fopen_s(&fp2, fn_1, "at")) == NULL)
 	{
 		fprintf(stderr, "file open error %s\n", fn_1);
+	}
+	if ((err3 = fopen_s(&fp3, fn_2, "at")) == NULL)
+	{
+		fprintf(stderr, "file open error %s\n", fn_2);
+	}
+	if ((err4 = fopen_s(&fp4, fn_3, "at")) == NULL)
+	{
+		fprintf(stderr, "file open error %s\n", fn_3);
 	}
 	/*if ((err2 = fopen_s(&fp2, file_name2, "wt")) == NULL)
 	{
@@ -1086,14 +1107,21 @@ void output_file(double* cd, double*ps ,double* fc,double*fc_vvi_p,double*fc_vvi
 			header_flag = 1;
 		}
 		fprintf_s(fp2, "%d , %f, %f, %f,%f,%f,%f,%f,%f, %f\n", (i/3)+1, cd[i + 1], fc[i + 1], fc_vvi_p[i+1],fc_vvi_m[i],fc_vvi_m[i+1],fc_pin[i+1],fc_Lor[i+1],fc_tho[i+1],fc[i+1]/Eta);
+		if (i == 0) {
+			fprintf_s(fp3, "%f,%f\n", cd[i+1], cd[i + 2]);
+		}
+		if (i == 3) {
+			fprintf_s(fp4, "%f,%f\n", cd[i + 1], cd[i + 2]);
+		}
 	}
 	fclose(fp);
 
-	
+	fclose(fp3);
+	fclose(fp4);
+
 	
 	fclose(fp2);
 }
-
 /****************************************************************************************/
 /*関数名：calc_f																		*/
 /*																						*/
